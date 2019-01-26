@@ -66,7 +66,7 @@ app.get('/get-audio/:audio', function (req, res) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     res.header("Content-Type", "audio/mp3");
-    res.set('Content-disposition', 'attachment; filename=' + slugify(info.title));
+    res.set('Content-disposition', 'attachment; filename=' + slugify(info.title) + ".mp3");
 
   });
 
