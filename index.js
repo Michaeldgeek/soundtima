@@ -51,7 +51,7 @@ app.get('/get-video/:video', function (req, res) {
   });
 });
 
-app.get('/get-audio/:audio', function (req, res) {
+app.get('/get-audio/:audio/:title', function (req, res) {
   var host = req.get('host');
   if (!host.trim().toLowerCase().includes("178.128.174.90")) {
     res.send("Token missing in request");
@@ -59,12 +59,10 @@ app.get('/get-audio/:audio', function (req, res) {
   }
 
   var id = req.params.audio.trim();
-  var title = id;
+  var title = req.params.title.trim();
   let stream = ytdl(id, {
     quality: 'highestaudio',
     //filter: 'audioonly',
-  }).on('info', function (info) {
-    title = info.title;
   });
 
 
@@ -75,7 +73,7 @@ app.get('/get-audio/:audio', function (req, res) {
       res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
       res.header("Content-Type", "audio/mp3");
-      res.set('Content-disposition', 'attachment; filename=' + slugify(title) + ".mp3");
+      res.set('Content-disposition', 'attachment; filename=' + slugify(title).toLowerCase().replace("official", "").replace("audio", "").replace("video", "") + ".mp3");
 
     })
     .on('error', function (err, stdout, stderr) {
