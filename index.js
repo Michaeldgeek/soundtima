@@ -59,25 +59,31 @@ app.get('/get-audio/:audio', function (req, res) {
   }
 
   var id = req.params.audio.trim();
+  var title = id;
   let stream = ytdl(id, {
     quality: 'highestaudio',
     //filter: 'audioonly',
   }).on('info', function (info) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Content-Type", "audio/mp3");
-    res.set('Content-disposition', 'attachment; filename=' + slugify(info.title) + ".mp3");
-
-    var command = ffmpeg(stream)
-      .audioBitrate(128)
-      .format('mp3')
-      .on('error', function (err, stdout, stderr) {
-        bugsnagClient.notify(err);
-      })
-      .on('end', () => {
-      }).pipe(res, { end: true });
+    title = info.title;
   });
 
+
+  var command = ffmpeg(stream)
+    .audioBitrate(128)
+    .format('mp3')
+    .on('start', function (params) {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.header("Content-Type", "audio/mp3");
+      res.set('Content-disposition', 'attachment; filename=' + slugify(title) + ".mp3");
+
+    })
+    .on('error', function (err, stdout, stderr) {
+      bugsnagClient.notify(err);
+    })
+    .on('end', () => {
+
+    }).pipe(res, { end: true });
 
 });
 
