@@ -24,7 +24,7 @@ app.get('/get-video/:video', function (req, res) {
   var id = req.params.video.trim();
   video = youtubedl('https://www.youtube.com/watch?v=' + id,
     // Optional arguments passed to youtube-dl.
-    ['--restrict-filenames', '--format=24,22,21,20,19,18,17,16,15,14'],
+    ['--restrict-filenames'],
     // Additional options can be given for calling `child_process.execFile()`.
     { cwd: __dirname });
 
