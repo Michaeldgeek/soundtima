@@ -7,11 +7,13 @@ const fetch = require('node-fetch');
 var bugsnag = require('@bugsnag/js');
 var bugsnagExpress = require('@bugsnag/plugin-express');
 var bugsnagClient = bugsnag('29d387a86fd1e0407905366c533ab614');
+
 bugsnagClient.use(bugsnagExpress);
 
 var middleware = bugsnagClient.getPlugin('express');
-
-
+const ytdl = require('ytdl-core');
+const ffmpeg = require('fluent-ffmpeg');
+const slugify = require('@sindresorhus/slugify');
 
 app.get('/get-video/:video', function (req, res) {
   var host = req.get('host');
@@ -22,7 +24,7 @@ app.get('/get-video/:video', function (req, res) {
   var id = req.params.video.trim();
   video = youtubedl('https://www.youtube.com/watch?v=' + id,
     // Optional arguments passed to youtube-dl.
-    [],
+    ['--restrict-filenames', '--format=24,22,21,20,19,18,17,16,15,14'],
     // Additional options can be given for calling `child_process.execFile()`.
     { cwd: __dirname });
 
@@ -32,19 +34,17 @@ app.get('/get-video/:video', function (req, res) {
   video.on('info', function (info) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    res.header("Content-Type", "video/mp4");
-    res.set('Content-disposition', 'attachment; ');
+    res.header("Content-Type", "video/" + info.ext);
+    res.set('Content-disposition', 'attachment; filename=' + info._filename);
     res.set("Content-Length", info.size);
   });
 
   video.pipe(res);
 
   video.on('end', function (data) {
-    console.log("Completed");
   });
 
   video.on('error', function error(err) {
-    console.log(err);
     bugsnagClient.notify(err);
     res.redirect('https://soundtima.com?error=45');
     return;
@@ -59,24 +59,33 @@ app.get('/get-audio/:audio', function (req, res) {
   }
 
   var id = req.params.audio.trim();
-  youtubedl.exec('https://www.youtube.com/watch?v=' + id, ['-x', '--get-url', '--audio-format', 'mp3'], {}, function (err, output) {
-    if (err) {
-      bugsnagClient.notify(err);
-      res.redirect('https://soundtima.com?error=45');
-      return;
-    }
-    fetch(output[0])
-      .then(reso => {
-        res.header("Access-Control-Allow-Origin", "*");
-        res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-        res.header("Content-Type", "audio/mp3");
-        res.set('Content-disposition', 'attachment;');
-        reso.body.pipe(res);
+  let stream = ytdl(id, {
+    quality: 'highestaudio',
+    //filter: 'audioonly',
+  }).on('info', function (info) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    res.header("Content-Type", "audio/mp3");
+    res.set('Content-disposition', 'attachment; filename=' + slugify(info.title));
 
-
-      });
   });
 
+
+  var command = ffmpeg(stream)
+    .audioBitrate(128)
+    .format('mp3')
+    .on('error', function (err, stdout, stderr) {
+      bugsnagClient.notify(err);
+    })
+    .on('end', () => {
+    }).pipe(res, { end: true });
+
 });
+
+app.get('/', function (req, res) {
+  res.send("Token missing in request");
+
+});
+
 
 app.listen(3000);
