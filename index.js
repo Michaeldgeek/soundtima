@@ -68,17 +68,16 @@ app.get('/get-audio/:audio', function (req, res) {
     res.header("Content-Type", "audio/mp3");
     res.set('Content-disposition', 'attachment; filename=' + slugify(info.title) + ".mp3");
 
+    var command = ffmpeg(stream)
+      .audioBitrate(128)
+      .format('mp3')
+      .on('error', function (err, stdout, stderr) {
+        bugsnagClient.notify(err);
+      })
+      .on('end', () => {
+      }).pipe(res, { end: true });
   });
 
-
-  var command = ffmpeg(stream)
-    .audioBitrate(128)
-    .format('mp3')
-    .on('error', function (err, stdout, stderr) {
-      bugsnagClient.notify(err);
-    })
-    .on('end', () => {
-    }).pipe(res, { end: true });
 
 });
 
