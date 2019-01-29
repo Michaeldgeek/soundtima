@@ -16,8 +16,8 @@ const ffmpeg = require('fluent-ffmpeg');
 const slugify = require('@sindresorhus/slugify');
 
 app.get('/get-video/:video', function (req, res) {
-  var host = req.get('host');
-  if (!host.trim().toLowerCase().includes("178.128.174.90")) {
+  var host = req.headers.referer
+  if (typeof host === 'undefined' || !host.trim().toLowerCase().includes("soundtima")) {
     res.send("Token missing in request");
     return;
   }
@@ -52,8 +52,8 @@ app.get('/get-video/:video', function (req, res) {
 });
 
 app.get('/get-audio/:audio/:title', function (req, res) {
-  var host = req.get('host');
-  if (!host.trim().toLowerCase().includes("178.128.174.90")) {
+  var host = req.headers.referer
+  if (typeof host === 'undefined' || !host.trim().toLowerCase().includes("soundtima")) {
     res.send("Token missing in request");
     return;
   }
