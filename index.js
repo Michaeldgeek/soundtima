@@ -18,8 +18,8 @@ const slugify = require('@sindresorhus/slugify');
 app.get('/get-video/:video', function (req, res) {
   //var host = req.headers.referer;
   //if (typeof host === 'undefined' || !host.trim().toLowerCase().includes("soundtima")) {
-    //res.send("Token missing in request");
-    //return;
+  //res.send("Token missing in request");
+  //return;
   //}
   var id = req.params.video.trim();
   video = youtubedl('https://www.youtube.com/watch?v=' + id,
@@ -53,11 +53,11 @@ app.get('/get-video/:video', function (req, res) {
 
 app.get('/get-audio/:audio/:title', function (req, res) {
   var host = req.headers.referer;
-  //console.log(host);
-  //if (typeof host === 'undefined' || !host.trim().toLowerCase().includes("soundtima")) {
-    //res.send("Token missing in request");
-    //return;
-  //}
+  console.log(host);
+  if (typeof host === 'undefined' || !host.trim().toLowerCase().includes("soundtima")) {
+    res.send("Token missing in request");
+    return;
+  }
 
   var id = req.params.audio.trim();
   var title = req.params.title.trim();
