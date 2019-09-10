@@ -26,7 +26,9 @@ app.get('/get-video/:video', function (req, res) {
     // Optional arguments passed to youtube-dl.
     ['--restrict-filenames'],
     // Additional options can be given for calling `child_process.execFile()`.
-    { cwd: __dirname });
+    {
+      cwd: __dirname
+    });
 
 
 
@@ -41,8 +43,7 @@ app.get('/get-video/:video', function (req, res) {
 
   video.pipe(res);
 
-  video.on('end', function (data) {
-  });
+  video.on('end', function (data) {});
 
   video.on('error', function error(err) {
     bugsnagClient.notify(err);
@@ -52,12 +53,12 @@ app.get('/get-video/:video', function (req, res) {
 });
 
 app.get('/get-audio/:audio/:title', function (req, res) {
-  var host = req.headers.referer;
-  console.log(host);
-  if (typeof host === 'undefined' || !host.trim().toLowerCase().includes("soundtima")) {
-    res.send("Token missing in request");
-    return;
-  }
+  // var host = req.headers.referer;
+  //console.log(host);
+  //if (typeof host === 'undefined' || !host.trim().toLowerCase().includes("soundtima")) {
+  //res.send("Token missing in request");
+  //return;
+  //}
 
   var id = req.params.audio.trim();
   var title = req.params.title.trim();
@@ -82,7 +83,9 @@ app.get('/get-audio/:audio/:title', function (req, res) {
     })
     .on('end', () => {
 
-    }).pipe(res, { end: true });
+    }).pipe(res, {
+      end: true
+    });
 
 });
 
